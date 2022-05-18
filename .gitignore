@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+
+fendly/.env
+fendly/fendly.db
+fendly_venv/
