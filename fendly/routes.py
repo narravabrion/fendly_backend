@@ -31,14 +31,14 @@ jwt = JWTManager(app)
 def login():
     try:
         if request.method == "POST":
-            print(request.json)
+            
             data = request.json
             conn = get_db()
             user = conn.execute(
                 "SELECT * FROM user WHERE email = ?", (data.get("email"),)
             ).fetchone()
             if user is None:
-                return "Invalid credentials"
+                return "Invalid credentials",401
             if user:
                 res = check_password_hash(dict(user)["password"], data["password"])
                 if res:
@@ -54,7 +54,7 @@ def login():
                     }
                     return response,200
                 else:
-                    return "Invalid credentials"
+                    return "Invalid credentials",401
     except ConnectionError:
         return "Failed to login!",401
     finally:
@@ -74,7 +74,6 @@ def logout():
 def registration():
     try:
         if request.method == "POST":
-            print(request.json)
             data = request.json
             conn = get_db()
 
@@ -208,7 +207,6 @@ def update_user():
                         data.get("website"),
                         int(data["user_id"]),
                     ),
-                    # (int(data["user_id"]),),
                 )
                 conn.execute(
                     "UPDATE user SET first_name=?,last_name=?,username=?,email=? WHERE user.userID=?",
@@ -220,7 +218,7 @@ def update_user():
                         data.get("email"),
                         int(data["user_id"]),
                     ),
-                    # (int(data["user_id"]),),
+                   
                 )
                 conn.commit()
                 return "user details successfully updated", 200
