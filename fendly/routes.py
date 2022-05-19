@@ -35,9 +35,10 @@ def login():
             data = request.json
             conn = get_db()
             
-            user = conn.cursor().execute(
+            conn.cursor().execute(
                 'SELECT * FROM "user" WHERE email = %s', (data.get('email'),)
-            ).fetchone()
+            )
+            user = conn.cursor().fetchone()
             if user is None:
                 return 'Invalid credentials',401
             if user:
@@ -103,14 +104,16 @@ def get_user_by_id(user_id):
   
     try:
         conn = get_db()
-        data = conn.cursor().execute(
+        conn.cursor().execute(
             'SELECT ud.profile_pic,ud.job_title,ud.company,ud.linkedIn_username,ud.twitter_username,ud.github_username,ud.website, u.first_name,u.last_name,u.username,u.email FROM "user_details" ud LEFT JOIN "user" u ON ud.userID=u.userID WHERE ud.userID = %s',
             (user_id,),
-        ).fetchone()
+        )
+        data = conn.cursor().fetchone()
         if data:
             return dict(data),200
         else:
-            data=conn.cursor().execute('SELECT first_name, last_name,username,email FROM "user" where userID = %s',(user_id,)).fetchone()
+            conn.cursor().execute('SELECT first_name, last_name,username,email FROM "user" where userID = %s',(user_id,))
+            data = conn.cursor().fetchone()
             return dict(data),200
     except:
         return 'could not load user',500
@@ -160,13 +163,15 @@ def update_user():
             current_user = get_jwt_identity()
             user_id=current_user.get('ID')
             # save data to db
-            user = conn.cursor().execute(
+            conn.cursor().execute(
                 'SELECT userID FROM "user" WHERE userID = %s', (user_id,)
-            ).fetchone()
-            user_details = conn.cursor().execute(
+            )
+            user = conn.cursor().fetchone()
+            conn.cursor().execute(
                 'SELECT * FROM "user_details" WHERE userID = %s',
                 (user_id,),
-            ).fetchone()
+            )
+            user_details=conn.cursor().fetchone()
             
            
             if (user is not None) and (user_details is None):
