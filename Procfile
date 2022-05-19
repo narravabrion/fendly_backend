@@ -1,1 +1,1 @@
-web: gunicorn fendly:app
+web: gunicorn main:app
