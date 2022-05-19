@@ -36,7 +36,7 @@ def login():
             conn = get_db()
             
             user = conn.cursor().execute(
-                'SELECT * FROM "user" WHERE email = ?', (data.get('email'),)
+                'SELECT * FROM "user" WHERE email = %s', (data.get('email'),)
             ).fetchone()
             if user is None:
                 return 'Invalid credentials',401
@@ -79,7 +79,7 @@ def registration():
             conn = get_db()
 
             conn.cursor().execute(
-                'INSERT INTO "user" (first_name,last_name,username,email,password) VALUES(?,?,?,?,?)',
+                'INSERT INTO "user" (first_name,last_name,username,email,password) VALUES(%s,%s,%s,%s,%s)',
                 [
                     data['first_name'],
                     data['last_name'],
@@ -104,13 +104,13 @@ def get_user_by_id(user_id):
     try:
         conn = get_db()
         data = conn.cursor().execute(
-            'SELECT ud.profile_pic,ud.job_title,ud.company,ud.linkedIn_username,ud.twitter_username,ud.github_username,ud.website, u.first_name,u.last_name,u.username,u.email FROM "user_details" ud LEFT JOIN "user" u ON ud.userID=u.userID WHERE ud.userID = ?',
+            'SELECT ud.profile_pic,ud.job_title,ud.company,ud.linkedIn_username,ud.twitter_username,ud.github_username,ud.website, u.first_name,u.last_name,u.username,u.email FROM "user_details" ud LEFT JOIN "user" u ON ud.userID=u.userID WHERE ud.userID = %s',
             (user_id,),
         ).fetchone()
         if data:
             return dict(data),200
         else:
-            data=conn.cursor().execute('SELECT first_name, last_name,username,email FROM "user" where userID = ?',(user_id,)).fetchone()
+            data=conn.cursor().execute('SELECT first_name, last_name,username,email FROM "user" where userID = %s',(user_id,)).fetchone()
             return dict(data),200
     except:
         return 'could not load user',500
@@ -128,8 +128,8 @@ def delete_account(user_id):
         user=current_user.get('ID')
         conn = get_db()
         if user == int(user_id):
-            conn.cursor().execute('DELETE FROM "user" WHERE userID=?',(user_id,))
-            conn.cursor().execute('DELETE FROM "user_details" WHERE userID=?',(user_id,))
+            conn.cursor().execute('DELETE FROM "user" WHERE userID=%s',(user_id,))
+            conn.cursor().execute('DELETE FROM "user_details" WHERE userID=%s',(user_id,))
             conn.commit()
             return 'User successfully deleted!',200
     except ConnectionError:
@@ -161,10 +161,10 @@ def update_user():
             user_id=current_user.get('ID')
             # save data to db
             user = conn.cursor().execute(
-                'SELECT userID FROM "user" WHERE userID = ?', (user_id,)
+                'SELECT userID FROM "user" WHERE userID = %s', (user_id,)
             ).fetchone()
             user_details = conn.cursor().execute(
-                'SELECT * FROM "user_details" WHERE userID = ?',
+                'SELECT * FROM "user_details" WHERE userID = %s',
                 (user_id,),
             ).fetchone()
             
@@ -176,7 +176,7 @@ def update_user():
                 else:
                     image = 'https://img.icons8.com/ios-filled/344/who.png'
                 conn.cursor().execute(
-                    'INSERT INTO "user_details" (userID,profile_pic,job_title,company,linkedIn_username,twitter_username,github_username,website) VALUES(?,?,?,?,?,?,?,?)',
+                    'INSERT INTO "user_details" (userID,profile_pic,job_title,company,linkedIn_username,twitter_username,github_username,website) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)',
                     [
                         user[0],
                         image,
@@ -197,7 +197,7 @@ def update_user():
                 else:
                     image = dict(user_details).get('profile_pic')
                 conn.cursor().execute(
-                    'UPDATE "user_details" SET profile_pic=?,job_title=?,company=?,linkedIn_username=?,twitter_username=?,github_username=?,website=? WHERE user_details.userID=?',
+                    'UPDATE "user_details" SET profile_pic=%s,job_title=%s,company=%s,linkedIn_username=%s,twitter_username=%s,github_username=%s,website=%s WHERE user_details.userID=%s',
                     (
                         image,
                         data.get('job_title'),
@@ -210,7 +210,7 @@ def update_user():
                     ),
                 )
                 conn.cursor().execute(
-                    'UPDATE "user" SET first_name=?,last_name=?,username=?,email=? WHERE user.userID=?',
+                    'UPDATE "user" SET first_name=%s,last_name=%s,username=%s,email=%s WHERE user.userID=%s',
                     (
                         
                         data.get('first_name'),
