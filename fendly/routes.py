@@ -159,8 +159,7 @@ def update_user():
             )
 
             # get json data from request and open db connection
-            # data = dict(request.form)
-            data = request.json
+            data = dict(request.form)
             conn = get_db()
             curr = conn.cursor()
             # get user identity
